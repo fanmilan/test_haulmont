@@ -35,7 +35,7 @@ export function LaunchesPage() {
         getLaunches()
             .then((res) => {
                 setLaunches(res);
-                getOptions(res);
+                getFilterOptions(res);
             }).catch((err) => {
                 console.log(err);
                 alert('Произошла ошибка.');
@@ -45,39 +45,36 @@ export function LaunchesPage() {
     }, []);
 
 
-    const getOptions = (arr: Array<LaunchItemType>): void => {
-
-        type uniqueHelperType = Record<filtersIdType, {
-            keys: Set<Object>,
-            result: Array<SelectOptions>
-        }>;
-
+    const getFilterOptions = (launchItems: Array<LaunchItemType>): void => {
 
         const fields: Array<filtersIdType> = filters.map((filter) => filter.id);
 
-        const uniqueHelper: uniqueHelperType = {} as uniqueHelperType;
 
-        for (let field of fields) {
-            uniqueHelper[field] = {
-                keys: new Set(),
-                result: []
+
+
+        type uniqueHelperType = Record<filtersIdType, Array<SelectOptions>>;
+
+        //const uniqueOptions : uniqueHelperType = Object.fromEntries(fields.map((field) => [field, []])) as any;
+        const uniqueOptions : uniqueHelperType = fields.reduce((obj: uniqueHelperType, field)=>{
+            return {
+                ...obj,
+                [field] : []
             }
-        }
+        }, {} as uniqueHelperType);
 
-        arr.forEach((item: LaunchItemType) => {
+
+
+        launchItems.forEach((launch_item, index) => {
             for (let field of fields) {
-                const id: string = item[field].id;
-                if (!uniqueHelper[field].keys.has(id)) {
-                    uniqueHelper[field].keys.add(id);
-                    uniqueHelper[field].result.push(item[field]);
+                if (uniqueOptions[field].findIndex((uniqueItem)=>uniqueItem.id === launch_item[field].id) === -1) {
+                    uniqueOptions[field].push(launch_item[field]);
+                }
+
+                if (index === launchItems.length-1) {
+                    changeFilter(field, 'options', uniqueOptions[field])
                 }
             }
         });
-
-        for (let field of fields) {
-            changeFilter(field, 'options', uniqueHelper[field].result)
-        }
-
     }
 
 

@@ -21,9 +21,9 @@ type resGetLaunchesType = {
 
 export function getLaunches() : Promise<Array<LaunchItemType>> {
     return fetch(url)
-        .then((response) => {
+        .then((response: Response) => {
             return response.json();
-        }).then(res => {
+        }).then((res: Array<resGetLaunchesType>) => {
             return res.map((item : resGetLaunchesType) => ({
                 image: item.links.mission_patch_small,
                 title: item.mission_name,
